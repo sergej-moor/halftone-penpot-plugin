@@ -117,19 +117,20 @@ async function halftoneImage(
     contrast: number;
   }
 ): Promise<ProcessedImage> {
+  // Create source canvas at full size
   const [sourceCanvas, ctxSource] = createCanvas(width, height);
 
   // Create and draw original image
   const blob = new Blob([imageData], { type: 'image/png' });
   const imageBitmap = await createImageBitmap(blob);
-  ctxSource.drawImage(imageBitmap, 0, 0);
+  ctxSource.drawImage(imageBitmap, 0, 0, width, height); // Explicitly set dimensions
 
   // Process source image
   const sourceImageData = ctxSource.getImageData(0, 0, width, height);
   processImageData(sourceImageData, options.saturation, options.contrast);
   ctxSource.putImageData(sourceImageData, 0, 0);
 
-  // Create final canvas
+  // Create final canvas at full size
   const [canvas, ctx] = createCanvas(width, height);
   ctx.fillStyle = 'white';
   ctx.fillRect(0, 0, width, height);
@@ -145,6 +146,12 @@ async function halftoneImage(
     },
   };
 
+  // Calculate grid coverage
+  const diagonal = Math.sqrt(width * width + height * height);
+  const numSteps = Math.ceil(diagonal / options.size) + 4; // Increase padding
+  const centerX = width / 2;
+  const centerY = height / 2;
+
   // Process each CMYK channel
   Object.entries(cmykConfig.colors).forEach(([channel, color]) => {
     const [layerCanvas, ctxLayer] = createCanvas(width, height);
@@ -153,28 +160,42 @@ async function halftoneImage(
 
     const stepX = options.size * Math.cos(angleRad);
     const stepY = options.size * Math.sin(angleRad);
-    const diagonal = Math.sqrt(width * width + height * height);
-    const numSteps = Math.ceil(diagonal / options.size);
 
     ctxLayer.fillStyle = color;
+
+    // Adjust the loop bounds to cover the entire image
     for (let i = -numSteps; i <= numSteps; i++) {
       for (let j = -numSteps; j <= numSteps; j++) {
-        const x = width / 2 + (i * stepX - j * stepY);
-        const y = height / 2 + (i * stepY + j * stepX);
+        const x = centerX + (i * stepX - j * stepY);
+        const y = centerY + (i * stepY + j * stepX);
 
-        if (x < 0 || x >= width || y < 0 || y >= height) continue;
+        // Adjust bounds check to include a margin
+        const margin = options.size * 2;
+        if (
+          x < -margin ||
+          x > width + margin ||
+          y < -margin ||
+          y > height + margin
+        )
+          continue;
 
-        const pixelIndex = (Math.floor(y) * width + Math.floor(x)) * 4;
-        const channelValue = getChannelValue(
-          channel as CMYKChannel,
-          sourceImageData.data,
-          pixelIndex,
-          cmykConfig.minValues
-        );
-        const t = channelValue / 255;
-        const dotSize = options.size * (0.8 * Math.max(0.4, t) + t * 0.2);
+        const pixelX = Math.floor(x);
+        const pixelY = Math.floor(y);
 
-        drawDot(ctxLayer, x, y, dotSize, quantizeValue(t), options.size);
+        // Only process pixels within the actual image bounds
+        if (pixelX >= 0 && pixelX < width && pixelY >= 0 && pixelY < height) {
+          const pixelIndex = (pixelY * width + pixelX) * 4;
+          const channelValue = getChannelValue(
+            channel as CMYKChannel,
+            sourceImageData.data,
+            pixelIndex,
+            cmykConfig.minValues
+          );
+          const t = channelValue / 255;
+          const dotSize = options.size * (0.8 * Math.max(0.4, t) + t * 0.2);
+
+          drawDot(ctxLayer, x, y, dotSize, quantizeValue(t), options.size);
+        }
       }
     }
 
