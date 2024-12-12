@@ -1,32 +1,52 @@
 <script lang="ts">
-  import { selection, processImage, updatePreview } from '../stores/selection';
-  import { CONSTANTS } from '../constants';
+  import {
+    selection,
+    applyImageEffect,
+    updatePreview,
+  } from '../stores/selection';
+  import { HALFTONE_CONSTANTS } from '../constants/halftone';
   import { tooltip } from '../actions/tooltip';
 
-  let currentValue = $selection.effectIntensity;
-  let displayValue = currentValue;
+  let currentValues = {
+    size: $selection.size,
+    angle: $selection.angle,
+    saturation: $selection.saturation,
+    contrast: $selection.contrast,
+  };
+
+  let displayValues = { ...currentValues };
   let lastSelectionId = $selection.id;
   let realtimePreview = false;
   let previousRealtimeState = false;
 
-  // Just update the display value during dragging
-  function handleInput(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    displayValue = parseInt(input.value);
+  function handleInput(param: keyof typeof currentValues) {
+    return (event: Event): void => {
+      const input = event.target as HTMLInputElement;
+      displayValues[param] = parseFloat(input.value);
+    };
   }
 
-  // Update preview when slider is released
-  function handleChange(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const pixelSize = parseInt(input.value);
-    currentValue = pixelSize;
-    displayValue = pixelSize;
+  function handleChange(param: keyof typeof currentValues) {
+    return (event: Event): void => {
+      const input = event.target as HTMLInputElement;
+      const value = parseFloat(input.value);
+      currentValues[param] = value;
+      displayValues[param] = value;
 
-    updatePreview(pixelSize);
+      updatePreview(currentValues);
 
-    if (realtimePreview) {
-      handleApplyEffect();
-    }
+      if (realtimePreview) {
+        handleApplyEffect();
+      }
+    };
+  }
+
+  function handleApplyEffect(): void {
+    applyImageEffect(currentValues, false);
+  }
+
+  function handleAddNewLayer(): void {
+    applyImageEffect(currentValues, true);
   }
 
   // Watch for changes in realtime preview and selection fills
@@ -41,14 +61,6 @@
     }
   }
 
-  function handleApplyEffect(): void {
-    processImage(currentValue, false);
-  }
-
-  function handleAddNewLayer(): void {
-    processImage(currentValue, true);
-  }
-
   function handleDeleteTopLayer(): void {
     window.parent.postMessage(
       {
@@ -58,14 +70,18 @@
     );
   }
 
-  // Only update values when selection changes (new image selected)
+  // Update values when selection changes
   $: if ($selection.id !== lastSelectionId) {
-    currentValue = $selection.effectIntensity;
-    displayValue = currentValue;
+    currentValues = {
+      size: $selection.size,
+      angle: $selection.angle,
+      saturation: $selection.saturation,
+      contrast: $selection.contrast,
+    };
+    displayValues = { ...currentValues };
     lastSelectionId = $selection.id;
   }
 
-  // Check if controls should be disabled
   $: isDisabled = !$selection.processedImage;
   $: isProcessing =
     $selection.isProcessing ||
@@ -98,27 +114,117 @@
     <span
       class="body-s"
       use:tooltip={{
-        text: 'Adjust the size of pixels in the effect',
+        text: 'Adjust the size of halftone dots',
         maxWidth: 'max-w-[200px]',
         position: 'right',
       }}
     >
-      Pixel Size
+      Dot Size:
     </span>
     <div class="flex items-center gap-2">
       <div class="relative flex-1">
         <input
           type="range"
-          min={CONSTANTS.MIN_PIXEL_SIZE}
-          max={CONSTANTS.MAX_PIXEL_SIZE}
-          value={displayValue}
-          on:input={handleInput}
-          on:change={handleChange}
+          min={HALFTONE_CONSTANTS.MIN_SIZE}
+          max={HALFTONE_CONSTANTS.MAX_SIZE}
+          value={displayValues.size}
+          on:input={handleInput('size')}
+          on:change={handleChange('size')}
           class="w-full {isDisabled || isProcessing ? 'opacity-50' : ''}"
           disabled={isDisabled || isProcessing}
         />
       </div>
-      <span class="text-sm w-8 text-right">{displayValue}</span>
+      <span class="text-sm w-8 text-right">{displayValues.size}</span>
+    </div>
+  </label>
+
+  <label class="slider-row">
+    <span
+      class="body-s"
+      use:tooltip={{
+        text: 'Adjust the angle of the halftone pattern',
+        maxWidth: 'max-w-[200px]',
+        position: 'right',
+      }}
+    >
+      Angle:
+    </span>
+    <div class="flex items-center gap-2">
+      <div class="relative flex-1">
+        <input
+          type="range"
+          min={HALFTONE_CONSTANTS.MIN_ANGLE}
+          max={HALFTONE_CONSTANTS.MAX_ANGLE}
+          value={displayValues.angle}
+          on:input={handleInput('angle')}
+          on:change={handleChange('angle')}
+          class="w-full {isDisabled || isProcessing ? 'opacity-50' : ''}"
+          disabled={isDisabled || isProcessing}
+        />
+      </div>
+      <span class="text-sm w-8 text-right">{displayValues.angle}°</span>
+    </div>
+  </label>
+
+  <label class="slider-row">
+    <span
+      class="body-s"
+      use:tooltip={{
+        text: 'Adjust the color saturation',
+        maxWidth: 'max-w-[200px]',
+        position: 'right',
+      }}
+    >
+      Saturation:
+    </span>
+    <div class="flex items-center gap-2">
+      <div class="relative flex-1">
+        <input
+          type="range"
+          min={HALFTONE_CONSTANTS.MIN_SATURATION}
+          max={HALFTONE_CONSTANTS.MAX_SATURATION}
+          step="0.1"
+          value={displayValues.saturation}
+          on:input={handleInput('saturation')}
+          on:change={handleChange('saturation')}
+          class="w-full {isDisabled || isProcessing ? 'opacity-50' : ''}"
+          disabled={isDisabled || isProcessing}
+        />
+      </div>
+      <span class="text-sm w-12 text-right"
+        >{displayValues.saturation.toFixed(1)}</span
+      >
+    </div>
+  </label>
+
+  <label class="slider-row">
+    <span
+      class="body-s"
+      use:tooltip={{
+        text: 'Adjust the image contrast',
+        maxWidth: 'max-w-[200px]',
+        position: 'right',
+      }}
+    >
+      Contrast:
+    </span>
+    <div class="flex items-center gap-2">
+      <div class="relative flex-1">
+        <input
+          type="range"
+          min={HALFTONE_CONSTANTS.MIN_CONTRAST}
+          max={HALFTONE_CONSTANTS.MAX_CONTRAST}
+          step="0.1"
+          value={displayValues.contrast}
+          on:input={handleInput('contrast')}
+          on:change={handleChange('contrast')}
+          class="w-full {isDisabled || isProcessing ? 'opacity-50' : ''}"
+          disabled={isDisabled || isProcessing}
+        />
+      </div>
+      <span class="text-sm w-12 text-right"
+        >{displayValues.contrast.toFixed(1)}</span
+      >
     </div>
   </label>
 

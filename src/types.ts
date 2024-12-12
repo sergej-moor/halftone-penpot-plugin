@@ -1,5 +1,36 @@
 import type { Fill } from '@penpot/plugin-types';
 
+// Halftone Types
+export type CMYKChannel = 'c' | 'm' | 'y' | 'k';
+
+export interface CMYKAngles {
+  c: number;
+  m: number;
+  y: number;
+  k: number;
+}
+
+export interface CMYKColors {
+  c: string;
+  m: string;
+  y: string;
+  k: string;
+}
+
+export interface CMYKConfig {
+  angles: CMYKAngles;
+  colors: CMYKColors;
+  minValues: CMYKAngles;
+}
+
+export interface HalftoneControls {
+  patternType: 'dots' | 'halftones';
+  angle: number;
+  size: number;
+  saturation: number;
+  contrast: number;
+}
+
 // Data Types
 export interface ImageData {
   data: Uint8Array;
@@ -30,7 +61,11 @@ export interface SelectionState {
   isProcessing: boolean;
   isUploadingFill: boolean;
   isPreviewLoading: boolean;
-  effectIntensity: number;
+  patternType: 'dots' | 'halftones';
+  angle: number;
+  size: number;
+  saturation: number;
+  contrast: number;
   error?: string;
   originalImage?: {
     data: number[];

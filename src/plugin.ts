@@ -12,9 +12,25 @@ import type {
 
 // Configuration
 const PLUGIN_CONFIG = {
-  name: 'Pixelize!',
+  name: 'Halftone Effect',
   width: 340,
   height: 622,
+} as const;
+
+// Add constants directly in plugin.ts
+const HALFTONE_DEFAULTS = {
+  DEFAULT_SIZE: 10,
+  MIN_SIZE: 4,
+  MAX_SIZE: 50,
+  DEFAULT_ANGLE: 34,
+  MIN_ANGLE: 0,
+  MAX_ANGLE: 360,
+  DEFAULT_SATURATION: 1.5,
+  MIN_SATURATION: 0.5,
+  MAX_SATURATION: 3,
+  DEFAULT_CONTRAST: 1.0,
+  MIN_CONTRAST: 0.5,
+  MAX_CONTRAST: 2,
 } as const;
 
 // Plugin initialization
@@ -167,7 +183,11 @@ async function handleSelectionChange(): Promise<void> {
       isProcessing: false,
       isUploadingFill: false,
       isPreviewLoading: false,
-      effectIntensity: 1,
+      patternType: 'dots',
+      angle: HALFTONE_DEFAULTS.DEFAULT_ANGLE,
+      size: HALFTONE_DEFAULTS.DEFAULT_SIZE,
+      saturation: HALFTONE_DEFAULTS.DEFAULT_SATURATION,
+      contrast: HALFTONE_DEFAULTS.DEFAULT_CONTRAST,
     };
 
     sendMessage({ type: 'selection', content: selectionState });

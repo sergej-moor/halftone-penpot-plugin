@@ -1,7 +1,8 @@
 import { writable, get } from 'svelte/store';
 import type { Fill } from '@penpot/plugin-types';
-import { pixelateImage } from '../utils/imageProcessing';
+import { processImage } from '../utils/imageProcessing';
 import type { SelectionState } from '../types';
+import { HALFTONE_CONSTANTS } from '../constants/halftone';
 
 const initialState: SelectionState = {
   id: '',
@@ -11,7 +12,11 @@ const initialState: SelectionState = {
   isProcessing: false,
   isUploadingFill: false,
   isPreviewLoading: false,
-  effectIntensity: 1,
+  patternType: 'dots',
+  angle: HALFTONE_CONSTANTS.DEFAULT_ANGLE,
+  size: HALFTONE_CONSTANTS.DEFAULT_SIZE,
+  saturation: HALFTONE_CONSTANTS.DEFAULT_SATURATION,
+  contrast: HALFTONE_CONSTANTS.DEFAULT_CONTRAST,
   error: undefined,
 };
 
@@ -39,7 +44,12 @@ export function updateSelection(
   }));
 }
 
-export async function updatePreview(intensity: number): Promise<void> {
+export async function updatePreview(params: {
+  size: number;
+  angle: number;
+  saturation: number;
+  contrast: number;
+}): Promise<void> {
   const state = get(selection);
   if (!state.originalImage || !state.name || !state.fills || !state.id) return;
   const currentId = state.id;
@@ -51,11 +61,14 @@ export async function updatePreview(intensity: number): Promise<void> {
       previewImage: undefined,
     }));
 
-    const processed = await pixelateImage(
+    const processed = await processImage(
       new Uint8Array(state.originalImage.data),
       state.originalImage.width,
       state.originalImage.height,
-      intensity
+      {
+        ...params,
+        patternType: state.patternType,
+      }
     );
 
     // Check if we still have the same selection
@@ -70,7 +83,7 @@ export async function updatePreview(intensity: number): Promise<void> {
 
     selection.update((state) => ({
       ...state,
-      effectIntensity: intensity,
+      ...params,
       isPreviewLoading: false,
       previewImage: {
         width: state.originalImage!.width,
@@ -83,13 +96,18 @@ export async function updatePreview(intensity: number): Promise<void> {
     selection.update((state) => ({
       ...state,
       isPreviewLoading: false,
-      previewImage: undefined, // Clear preview on error
+      previewImage: undefined,
     }));
   }
 }
 
-export async function processImage(
-  intensity: number,
+export async function applyImageEffect(
+  params: {
+    size: number;
+    angle: number;
+    saturation: number;
+    contrast: number;
+  },
   addNewLayer: boolean
 ): Promise<void> {
   const state = get(selection);
@@ -98,11 +116,14 @@ export async function processImage(
   try {
     selection.update((state) => ({ ...state, isProcessing: true }));
 
-    const processed = await pixelateImage(
+    const processed = await processImage(
       new Uint8Array(state.originalImage.data),
       state.originalImage.width,
       state.originalImage.height,
-      intensity
+      {
+        ...params,
+        patternType: state.patternType,
+      }
     );
 
     // Check if we still have a selection before continuing
@@ -127,7 +148,7 @@ export async function processImage(
     // Update the preview with the processed image
     selection.update((state) => ({
       ...state,
-      effectIntensity: intensity,
+      ...params,
       isProcessing: false,
       processedImage: {
         width: state.originalImage!.width,
