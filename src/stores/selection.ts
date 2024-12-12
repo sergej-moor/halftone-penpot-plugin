@@ -169,13 +169,15 @@ export function updateExportedImage(
   selectionId: string
 ): void {
   try {
+    let currentState: SelectionState;
+
     selection.update((state) => {
       // Only update if we still have the same selection
       if (!state.name || !state.fills || state.id !== selectionId) {
         return state;
       }
 
-      return {
+      currentState = {
         ...state,
         isLoading: false,
         originalImage: {
@@ -183,13 +185,29 @@ export function updateExportedImage(
           width,
           height,
         },
+        // Initialize processedImage with original image data
         processedImage: {
           data: imageData,
           width,
           height,
         },
       };
+
+      return currentState;
     });
+
+    // Call updatePreview after the state update is complete
+    if (currentState!) {
+      setTimeout(() => {
+        // Add small delay to ensure state is updated
+        updatePreview({
+          size: currentState.size,
+          angle: currentState.angle,
+          saturation: currentState.saturation,
+          contrast: currentState.contrast,
+        });
+      }, 0);
+    }
   } catch (error) {
     console.error('Failed to update exported image:', error);
     selection.update((state) => ({
