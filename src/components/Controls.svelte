@@ -79,6 +79,8 @@
       contrast: $selection.contrast,
     };
     displayValues = { ...currentValues };
+    realtimePreview = false;
+    previousRealtimeState = false;
     lastSelectionId = $selection.id;
   }
 
