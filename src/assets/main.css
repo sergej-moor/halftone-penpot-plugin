@@ -5,8 +5,8 @@
 @tailwind utilities;
 
 @font-face {
-  font-family: 'GamjaFlower';
-  src: url('/public/GamjaFlower-Regular.ttf');
+  font-family: 'Oswald';
+  src: url('/public/Oswald-VariableFont_wght.ttf');
 }
 
 :root {

@@ -4,7 +4,7 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        GamjaFlower: ['GamjaFlower', 'sans-serif'],
+        Oswald: ['Oswald', 'sans-serif'],
       },
     },
   },

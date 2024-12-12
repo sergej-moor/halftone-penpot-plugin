@@ -12,20 +12,20 @@ import type {
 
 // Configuration
 const PLUGIN_CONFIG = {
-  name: 'Halftone Effect',
-  width: 340,
-  height: 622,
+  name: 'Retro Halftones',
+  width: 740,
+  height: 462,
 } as const;
 
 // Add constants directly in plugin.ts
 const HALFTONE_DEFAULTS = {
-  DEFAULT_SIZE: 10,
-  MIN_SIZE: 4,
-  MAX_SIZE: 50,
+  DEFAULT_SIZE: 5,
+  MIN_SIZE: 2,
+  MAX_SIZE: 32,
   DEFAULT_ANGLE: 34,
   MIN_ANGLE: 0,
   MAX_ANGLE: 360,
-  DEFAULT_SATURATION: 1.5,
+  DEFAULT_SATURATION: 1.3,
   MIN_SATURATION: 0.5,
   MAX_SATURATION: 3,
   DEFAULT_CONTRAST: 1.0,

@@ -1,6 +1,6 @@
 {
-  "name": "Pixelize!",
-  "description": "Pixelize your images",
+  "name": "Retro Halftones",
+  "description": "Turn your images into analog-like prints!",
   "code": "/plugin.js",
   "icon": "/icon.png",
   "permissions": ["content:read", "content:write"]
