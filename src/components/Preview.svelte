@@ -39,7 +39,7 @@
     class="relative rounded-lg border border-gray-200 dark:border-gray-700 w-[400px] h-[400px]"
   >
     {#if $selection.error}
-      <div class="flex items-center justify-center h-full p-4">
+      <div class="flex items-center justify-center h-full p-4 px-8">
         <p class="text-sm text-red-600 text-center">{$selection.error}</p>
       </div>
     {:else if previewUrl}

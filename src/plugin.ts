@@ -62,6 +62,10 @@ async function uploadImage(imageData: Uint8Array): Promise<PenpotImageData> {
     return uploadedImage;
   } catch (error) {
     console.error('Error uploading image:', error);
+    sendMessage({
+      type: 'export-error',
+      error: 'Failed to upload image. The file might be too large.',
+    });
     throw error;
   }
 }
@@ -195,6 +199,10 @@ async function handleSelectionChange(): Promise<void> {
     }
   } catch (error) {
     console.error('Error handling selection change:', error);
+    sendMessage({
+      type: 'export-error',
+      error: 'Failed to process selection. Please try again',
+    });
   } finally {
     sendMessage({ type: 'selection-loading', isLoading: false });
   }

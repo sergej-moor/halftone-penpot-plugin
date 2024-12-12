@@ -102,4 +102,5 @@ export type PluginMessage =
       shouldDeleteFirst: boolean;
     }
   | { type: 'fill-upload-complete' }
-  | { type: 'delete-top-layer' };
+  | { type: 'delete-top-layer' }
+  | { type: 'export-error'; error: string };
