@@ -24,7 +24,6 @@ export interface CMYKConfig {
 }
 
 export interface HalftoneControls {
-  patternType: 'dots' | 'halftones';
   angle: number;
   size: number;
   saturation: number;
@@ -61,7 +60,6 @@ export interface SelectionState {
   isProcessing: boolean;
   isUploadingFill: boolean;
   isPreviewLoading: boolean;
-  patternType: 'dots' | 'halftones';
   angle: number;
   size: number;
   saturation: number;
@@ -104,5 +102,4 @@ export type PluginMessage =
       shouldDeleteFirst: boolean;
     }
   | { type: 'fill-upload-complete' }
-  | { type: 'delete-top-layer' }
-  | { type: 'export-error'; error: string };
+  | { type: 'delete-top-layer' };

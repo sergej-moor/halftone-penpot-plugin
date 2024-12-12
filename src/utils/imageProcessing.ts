@@ -100,7 +100,6 @@ export async function processImage(
     angle: number;
     saturation: number;
     contrast: number;
-    patternType: 'dots' | 'halftones';
   }
 ): Promise<ProcessedImage> {
   return halftoneImage(imageData, width, height, options);

@@ -7,8 +7,6 @@ import {
   setUploadingFill,
   setLoading,
 } from '../stores/selection';
-import { selection } from '../stores/selection';
-import type { SelectionState } from '../types';
 
 export class MessageHandler {
   static handle(event: MessageEvent<PluginMessage>): void {
@@ -45,15 +43,6 @@ export class MessageHandler {
 
         case 'fill-upload-complete':
           setUploadingFill(false);
-          break;
-
-        case 'export-error':
-          console.error('Export error:', message.error);
-          setLoading(false);
-          selection.update((state: SelectionState) => ({
-            ...state,
-            error: 'Unable to export image. Please try again.',
-          }));
           break;
 
         default:

@@ -12,7 +12,6 @@ const initialState: SelectionState = {
   isProcessing: false,
   isUploadingFill: false,
   isPreviewLoading: false,
-  patternType: 'dots',
   angle: HALFTONE_CONSTANTS.DEFAULT_ANGLE,
   size: HALFTONE_CONSTANTS.DEFAULT_SIZE,
   saturation: HALFTONE_CONSTANTS.DEFAULT_SATURATION,
@@ -65,10 +64,7 @@ export async function updatePreview(params: {
       new Uint8Array(state.originalImage.data),
       state.originalImage.width,
       state.originalImage.height,
-      {
-        ...params,
-        patternType: state.patternType,
-      }
+      params
     );
 
     // Check if we still have the same selection
@@ -120,10 +116,7 @@ export async function applyImageEffect(
       new Uint8Array(state.originalImage.data),
       state.originalImage.width,
       state.originalImage.height,
-      {
-        ...params,
-        patternType: state.patternType,
-      }
+      params
     );
 
     // Check if we still have a selection before continuing

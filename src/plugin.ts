@@ -62,10 +62,6 @@ async function uploadImage(imageData: Uint8Array): Promise<PenpotImageData> {
     return uploadedImage;
   } catch (error) {
     console.error('Error uploading image:', error);
-    sendMessage({
-      type: 'export-error',
-      error: 'Failed to upload image. The file might be too large.',
-    });
     throw error;
   }
 }
@@ -103,10 +99,6 @@ async function addNewProcessedLayer(data: NewLayerConfig): Promise<void> {
     sendMessage({ type: 'fill-upload-complete' });
   } catch (error) {
     console.error('Error creating new layer:', error);
-    sendMessage({
-      type: 'export-error',
-      error: 'Failed to create new layer. Please try again.',
-    });
   } finally {
     penpot.history.undoBlockFinish(blockId);
   }
@@ -183,7 +175,6 @@ async function handleSelectionChange(): Promise<void> {
       isProcessing: false,
       isUploadingFill: false,
       isPreviewLoading: false,
-      patternType: 'dots',
       angle: HALFTONE_DEFAULTS.DEFAULT_ANGLE,
       size: HALFTONE_DEFAULTS.DEFAULT_SIZE,
       saturation: HALFTONE_DEFAULTS.DEFAULT_SATURATION,
@@ -204,10 +195,6 @@ async function handleSelectionChange(): Promise<void> {
     }
   } catch (error) {
     console.error('Error handling selection change:', error);
-    sendMessage({
-      type: 'export-error',
-      error: 'Failed to process selection. The image might be too complex.',
-    });
   } finally {
     sendMessage({ type: 'selection-loading', isLoading: false });
   }
